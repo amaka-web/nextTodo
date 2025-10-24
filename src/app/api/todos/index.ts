@@ -2,7 +2,14 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { readTodos, writeTodos, ServerTodo } from '@/lib/todosDb';
 import { verifyToken } from '@/lib/jwt';
 
-function requireAuth(req: NextApiRequest, res: NextApiResponse) {
+interface AuthPayload {
+  sub?: string;
+  id?: string;
+  email?: string;
+  [key: string]: unknown;
+}
+
+function requireAuth(req: NextApiRequest, res: NextApiResponse): AuthPayload | null {
   const auth = req.headers.authorization || '';
   if (!auth.startsWith('Bearer ')) {
     res.status(401).json({ message: 'Unauthorized' });
@@ -14,15 +21,16 @@ function requireAuth(req: NextApiRequest, res: NextApiResponse) {
     res.status(401).json({ message: 'Invalid token' });
     return null;
   }
-  return payload as any;
+  return payload as AuthPayload;
 }
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   const method = req.method;
+  
   if (method === 'GET') {
-    // public reading for demo — but we require auth
     const payload = requireAuth(req, res);
     if (!payload) return;
+    
     const all = readTodos();
     // Optionally filter by ownerId: return only that user's todos
     // const userTodos = all.filter(t => t.ownerId === payload.sub || t.ownerId === payload.id)
@@ -32,6 +40,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (method === 'POST') {
     const payload = requireAuth(req, res);
     if (!payload) return;
+    
     const ops = req.body; // expect array of todos or a single todo (upsert)
     const current = readTodos();
 
@@ -41,8 +50,12 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     for (const item of incoming) {
       // find existing
       const idx = current.findIndex((t) => t.id === item.id);
+      
       // attach ownerId if missing
-      if (!item.ownerId) item.ownerId = (payload as any).sub || (payload as any).id || (payload as any).email;
+      if (!item.ownerId) {
+        item.ownerId = payload.sub || payload.id || payload.email;
+      }
+      
       if (idx === -1) {
         current.push(item as ServerTodo);
       } else {

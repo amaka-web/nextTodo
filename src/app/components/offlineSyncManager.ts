@@ -1,6 +1,6 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { pushOutbox } from "@/lib/syncManager";
+import React, { useEffect } from "react";
+import { pushOutbox, pullServer } from "@/lib/syncManager"; // Fixed: pullServer instead of pullFromServer
 
 interface SyncManagerProps {
   userId?: string;
@@ -11,15 +11,8 @@ export const OfflineSyncManager: React.FC<SyncManagerProps> = ({
   userId,
   syncInterval = 10000, // 10 seconds default
 }) => {
-  const [stats, setStats] = useState({
-    totalSyncs: 0,
-    failedSyncs: 0,
-    lastError: null as string | null,
-  });
-
   useEffect(() => {
-    let syncTimer: NodeJS.Timeout;
-    let pullTimer: NodeJS.Timeout;
+    let syncTimer: NodeJS.Timeout | null = null;
     let isActive = true;
 
     const performSync = async () => {
@@ -30,22 +23,9 @@ export const OfflineSyncManager: React.FC<SyncManagerProps> = ({
         await pushOutbox();
         
         // Pull updates from server
-        if (userId) {
-          await pullFromServer(userId);
-        }
-
-        setStats((prev) => ({
-          ...prev,
-          totalSyncs: prev.totalSyncs + 1,
-          lastError: null,
-        }));
+        await pullServer();
       } catch (error) {
         console.error("Auto-sync failed:", error);
-        setStats((prev) => ({
-          ...prev,
-          failedSyncs: prev.failedSyncs + 1,
-          lastError: error instanceof Error ? error.message : "Unknown error",
-        }));
       }
     };
 
@@ -79,8 +59,7 @@ export const OfflineSyncManager: React.FC<SyncManagerProps> = ({
 
     return () => {
       isActive = false;
-      clearInterval(syncTimer);
-      clearInterval(pullTimer);
+      if (syncTimer) clearInterval(syncTimer);
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
