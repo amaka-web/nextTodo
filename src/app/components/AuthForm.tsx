@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -39,9 +39,25 @@ export const AuthForm: React.FC = () => {
     try {
       if (isLogin) await signIn(email, password);
       else await signUp(username, email, password);
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Authentication failed");
-    } finally {
+    }  catch (err: unknown) {
+  let message = "Authentication failed";
+
+  if (
+    typeof err === "object" &&
+    err !== null &&
+    "response" in err
+  ) {
+    const errorObj = err as {
+      response?: { data?: { message?: string } };
+    };
+
+    if (typeof errorObj.response?.data?.message === "string") {
+      message = errorObj.response.data.message;
+    }
+  }
+
+  setError(message);
+} finally {
       setLoading(false);
     }
   };
