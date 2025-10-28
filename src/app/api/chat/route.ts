@@ -1,4 +1,4 @@
-// src/app/api/chat/route.ts
+
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 
@@ -22,3 +22,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ reply: "Failed to connect to ChatGPT." });
   }
 }
+

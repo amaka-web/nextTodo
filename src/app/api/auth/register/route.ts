@@ -1,4 +1,4 @@
-{/*
+
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import validator from "validator";
@@ -22,7 +22,7 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ message: "Account created", token }, { status: 201 });
 }
-*/}
+{/*
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -37,4 +37,4 @@ export async function POST(req: Request) {
     user: { id: "1", username, email },
   });
 }
-
+*/}

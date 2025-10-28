@@ -1,4 +1,4 @@
-{/*import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import validator from "validator";
 import { users } from "@/lib/usersDB";
@@ -19,7 +19,8 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ message: "Login successful", token }, { status: 200 });
 }
-*/}
+
+{/*
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -35,4 +36,4 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
 }
-
+*/}
