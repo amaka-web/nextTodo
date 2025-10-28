@@ -1,28 +1,32 @@
 import { NextResponse } from "next/server";
+import { todos } from "@/lib/todoStore";
 
-let todos: any[] = [];
-
-export async function GET(_: Request, { params }: { params: { id: string } }) {
-  const todo = todos.find((t) => t.id === parseInt(params.id));
+export async function GET(_: Request, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
+  const todo = todos.find((t) => t.id === parseInt(id));
   if (!todo) return NextResponse.json({ message: "Not found" }, { status: 404 });
   return NextResponse.json(todo, { status: 200 });
 }
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
-  const updatedData = await req.json();
-  const id = parseInt(params.id);
-  const index = todos.findIndex((t) => t.id === id);
+export async function PUT(req: Request, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
+  const updated = await req.json();
+  const index = todos.findIndex((t) => t.id === parseInt(id));
 
-  if (index === -1) {
+  if (index === -1)
     return NextResponse.json({ message: "Not found" }, { status: 404 });
-  }
 
-  todos[index] = { ...todos[index], ...updatedData };
+  todos[index] = { ...todos[index], ...updated };
   return NextResponse.json(todos[index], { status: 200 });
 }
 
-export async function DELETE(_: Request, { params }: { params: { id: string } }) {
-  const id = parseInt(params.id);
-  todos = todos.filter((t) => t.id !== id);
+export async function DELETE(_: Request, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
+  const index = todos.findIndex((t) => t.id === parseInt(id));
+
+  if (index === -1)
+    return NextResponse.json({ message: "Not found" }, { status: 404 });
+
+  todos.splice(index, 1);
   return NextResponse.json({ todos }, { status: 200 });
 }
