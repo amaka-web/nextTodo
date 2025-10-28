@@ -7,6 +7,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { Loader2 } from "lucide-react";
 import { SyncStatus } from "../components/syncStatus";
 import { OfflineSyncManager } from "@/app/components/offlineSyncManager";
+import Chat from "./Chat";
 
 export const TodoDashboard: React.FC = () => {
   const { user, signOut } = useAuth();
@@ -319,6 +320,7 @@ export const TodoDashboard: React.FC = () => {
           </div>
         )}
       </div>
+     <Chat />
     </div>
   );
 };

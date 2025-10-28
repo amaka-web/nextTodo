@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+{/*import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import validator from "validator";
 import { users } from "@/lib/usersDB";
@@ -19,3 +19,20 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ message: "Login successful", token }, { status: 200 });
 }
+*/}
+import { NextResponse } from "next/server";
+
+export async function POST(req: Request) {
+  const { email, password } = await req.json();
+
+  // Mock check
+  if (email === "test@example.com" && password === "password123") {
+    return NextResponse.json({
+      token: "mock-token",
+      user: { id: "1", username: "tester", email },
+    });
+  }
+
+  return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
+}
+
