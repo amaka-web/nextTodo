@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useEffect, useState } from "react";
 import { db, Todo } from "@/lib/dexieClient";
 import { setupSync, pushOutbox } from "@/lib/syncManager";
@@ -22,7 +20,7 @@ export const TodoDashboard: React.FC = () => {
 
   useEffect(() => {
     let mounted = true;
-    
+
     // Initial load from local DB
     (async () => {
       const arr = await db.todos.toArray();
@@ -56,12 +54,12 @@ export const TodoDashboard: React.FC = () => {
       updatedAt: Date.now(),
       ownerId: user?.id,
     };
-    
+
     await db.todos.put(newTodo);
     await db.outbox.put(newTodo);
     setTitle("");
     setTodos(await db.todos.toArray());
-    
+
     if (navigator.onLine) {
       pushOutbox().catch(console.error);
     }
@@ -76,16 +74,16 @@ export const TodoDashboard: React.FC = () => {
     if (!editingId) return;
     const t = await db.todos.get(editingId);
     if (!t) return;
-    
+
     t.title = editingTitle;
     t.updatedAt = Date.now();
-    
+
     await db.todos.put(t);
     await db.outbox.put(t);
     setEditingId(null);
     setEditingTitle("");
     setTodos(await db.todos.toArray());
-    
+
     if (navigator.onLine) {
       pushOutbox().catch(console.error);
     }
@@ -94,11 +92,11 @@ export const TodoDashboard: React.FC = () => {
   async function toggleComplete(t: Todo) {
     t.completed = !t.completed;
     t.updatedAt = Date.now();
-    
+
     await db.todos.put(t);
     await db.outbox.put(t);
     setTodos(await db.todos.toArray());
-    
+
     if (navigator.onLine) {
       pushOutbox().catch(console.error);
     }
@@ -107,7 +105,7 @@ export const TodoDashboard: React.FC = () => {
   async function softDelete(t: Todo) {
     t.deleted = true;
     t.updatedAt = Date.now();
-    
+
     await db.todos.put(t);
     await db.outbox.put(t);
     setTodos(await db.todos.toArray());
@@ -115,7 +113,7 @@ export const TodoDashboard: React.FC = () => {
     const timer = window.setTimeout(async () => {
       setUndoQueue((q) => q.filter((item) => item.id !== t.id));
     }, 5000);
-    
+
     setUndoQueue((q) => [...q, { id: t.id, timer }]);
 
     if (navigator.onLine) {
@@ -126,19 +124,19 @@ export const TodoDashboard: React.FC = () => {
   async function cancelDelete(id: string) {
     const found = undoQueue.find((u) => u.id === id);
     if (found && found.timer) clearTimeout(found.timer);
-    
+
     setUndoQueue((q) => q.filter((u) => u.id !== id));
-    
+
     const t = await db.todos.get(id);
     if (!t) return;
-    
+
     t.deleted = false;
     t.updatedAt = Date.now();
-    
+
     await db.todos.put(t);
     await db.outbox.put(t);
     setTodos(await db.todos.toArray());
-    
+
     if (navigator.onLine) {
       pushOutbox().catch(console.error);
     }
@@ -146,17 +144,17 @@ export const TodoDashboard: React.FC = () => {
 
   async function permanentDelete(id: string) {
     await db.todos.delete(id);
-    
+
     const tombstone: Todo = {
       id,
       title: "",
       updatedAt: Date.now(),
       deleted: true,
     };
-    
+
     await db.outbox.put(tombstone);
     setTodos(await db.todos.toArray());
-    
+
     if (navigator.onLine) {
       pushOutbox().catch(console.error);
     }
@@ -209,7 +207,7 @@ export const TodoDashboard: React.FC = () => {
               <Loader2 className="animate-spin" /> Loading...
             </div>
           ) : null}
-          
+
           <ul className="space-y-3">
             {todos
               .filter((t) => !t.deleted)
@@ -320,7 +318,7 @@ export const TodoDashboard: React.FC = () => {
           </div>
         )}
       </div>
-     <Chat />
+      <Chat />
     </div>
   );
 };
